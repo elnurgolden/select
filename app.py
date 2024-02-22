@@ -35,8 +35,8 @@ st.title("Stock Data Dashboard")
 # Sidebar for user input
 symbol1 = st.sidebar.text_input("Enter Stock Symbol 1:", "SPY")
 symbol2 = st.sidebar.text_input("Enter Stock Symbol 2:", "QQQ")
-symbol3 = st.sidebar.text_input("Enter January Portfolio Stocks (comma-separated):", "GOOGL,AMZN,FB,NVDA,TQQQ,COP,PXD")
-symbol4 = st.sidebar.text_input("Enter February Portfolio Stocks (comma-separated):", "COP,OXY,ET,KMI,TQQQ,MSFT,PXD")
+symbol3 = st.sidebar.text_input("Enter January Portfolio Stocks (comma-separated):", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
+symbol4 = st.sidebar.text_input("Enter February Portfolio Stocks (comma-separated):", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
 
 # Split the comma-separated symbols into a list
 symbol3_list = [symbol.strip() for symbol in symbol3.split(',')]
@@ -45,13 +45,15 @@ symbol4_list = [symbol.strip() for symbol in symbol4.split(',')]
 today_date = datetime.now().date()
 
 # Set default values for start and end dates
-start_date = st.sidebar.date_input("Select Start Date:", value=pd.to_datetime('2024-01-01'))
+#start_date = st.sidebar.date_input("Select Start Date:", value=pd.to_datetime('2024-15-01'))
+start_date = pd.to_datetime('2024-15-01')
 end_date = st.sidebar.date_input("Select End Date:", value=today_date)
 
 # Fetch data for all three symbols
 stock_data1 = fetch_stock_data(symbol1, start_date, end_date)
 stock_data2 = fetch_stock_data(symbol2, start_date, end_date)
 stock_data3_list = [fetch_stock_data(symbol, start_date, end_date) for symbol in symbol3_list]
+start_date = pd.to_datetime('2024-15-02')
 stock_data4_list = [fetch_stock_data(symbol, start_date, end_date) for symbol in symbol4_list]
 
 avg_stock3 = pd.concat([stock_data['Close'] for stock_data in stock_data3_list], axis=1).mean(axis=1)
@@ -111,10 +113,10 @@ with col2:
     roi4 = (avg_stock4_df['Close'] / avg_stock4_df['Close'].iloc[0] - 1) * 100
     
 
-    fig_roi.add_trace(go.Scatter(x=roi1.index, y=roi1, mode='lines', name=f"{symbol1} ROI"))
-    fig_roi.add_trace(go.Scatter(x=roi2.index, y=roi2, mode='lines', name=f"{symbol2} ROI"))
-    fig_roi.add_trace(go.Scatter(x=roi3.index, y=roi3, mode='lines', name="Jan ROI"))
-    fig_roi.add_trace(go.Scatter(x=roi4.index, y=roi4, mode='lines', name="Feb ROI"))
+    fig_roi.add_trace(go.Scatter(x=roi1.index, y=roi1, mode='lines', name=f"{symbol1} ROI",line=dict(color='blue', width=4)))
+    fig_roi.add_trace(go.Scatter(x=roi2.index, y=roi2, mode='lines', name=f"{symbol2} ROI",line=dict(color='darkblue', width=4)))
+    fig_roi.add_trace(go.Scatter(x=roi3.index, y=roi3, mode='lines', name="Jan ROI",line=dict(color='green', width=4)))
+    fig_roi.add_trace(go.Scatter(x=roi4.index, y=roi4, mode='lines', name="Feb ROI",line=dict(color='red', width=4)))
 
     fig_roi.update_layout(title='Cumulative Return on Investment',
                           xaxis_title='Date',
