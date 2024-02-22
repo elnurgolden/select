@@ -75,24 +75,24 @@ with col1:
     # Line plot for all three stocks
     fig = go.Figure()
 
-    fig.add_trace(go.Scatter(x=stock_data1.index, y=stock_data1['Close'], mode='lines', name=symbol1, line=dict(color='blue', width=4)))
-    fig.add_trace(go.Scatter(x=stock_data2.index, y=stock_data2['Close'], mode='lines', name=symbol2, line=dict(color='darkblue', width=4)))
+    fig.add_trace(go.Scatter(y=stock_data1['Close'], mode='lines', name=symbol1, line=dict(color='blue', width=4)))
+    fig.add_trace(go.Scatter(y=stock_data2['Close'], mode='lines', name=symbol2, line=dict(color='darkblue', width=4)))
 
     for i, stock_data in enumerate(stock_data3_list):
         symbol = symbol3_list[i]
         # Use RGBA format for color with transparency
         color = f'rgba(0, 128, 0, {0.5 + i * 0.1})'  # Adjust the transparency based on 'i'        
-        fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name=symbol, line=dict(color=color,dash='dash')))
+        fig.add_trace(go.Scatter(y=stock_data['Close'], mode='lines', name=symbol, line=dict(color=color,dash='dash')))
 
 
     for i, stock_data in enumerate(stock_data4_list):
         symbol = symbol4_list[i]
         # Use RGBA format for color with transparency
         color = f'rgba(255, 0, 0, {0.5 + i * 0.1})'  # Adjust the transparency based on 'i'        
-        fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name=symbol, line=dict(color=color,dash='dash')))
+        fig.add_trace(go.Scatter(y=stock_data['Close'], mode='lines', name=symbol, line=dict(color=color,dash='dash')))
 
-    fig.add_trace(go.Scatter(x=common_index3, y=avg_stock3, mode='lines', name='Avg January Stocks', line=dict(color='green', width=4)))
-    fig.add_trace(go.Scatter(x=common_index4, y=avg_stock4, mode='lines', name='Avg February Stocks', line=dict(color='red', width=4)))
+    fig.add_trace(go.Scatter(y=avg_stock3, mode='lines', name='Avg January Stocks', line=dict(color='green', width=4)))
+    fig.add_trace(go.Scatter(y=avg_stock4, mode='lines', name='Avg February Stocks', line=dict(color='red', width=4)))
 
     fig.update_layout(title='Stock Closing Prices Comparison',
                       xaxis_title='Date',
@@ -113,10 +113,10 @@ with col2:
     roi4 = (avg_stock4_df['Close'] / avg_stock4_df['Close'].iloc[0] - 1) * 100
     
 
-    fig_roi.add_trace(go.Scatter(x=roi1.index, y=roi1, mode='lines', name=f"{symbol1} ROI",line=dict(color='blue', width=4)))
-    fig_roi.add_trace(go.Scatter(x=roi2.index, y=roi2, mode='lines', name=f"{symbol2} ROI",line=dict(color='darkblue', width=4)))
-    fig_roi.add_trace(go.Scatter(x=roi3.index, y=roi3, mode='lines', name="Jan ROI",line=dict(color='green', width=4)))
-    fig_roi.add_trace(go.Scatter(x=roi4.index, y=roi4, mode='lines', name="Feb ROI",line=dict(color='red', width=4)))
+    fig_roi.add_trace(go.Scatter(y=roi1, mode='lines', name=f"{symbol1} ROI",line=dict(color='blue', width=4)))
+    fig_roi.add_trace(go.Scatter(y=roi2, mode='lines', name=f"{symbol2} ROI",line=dict(color='darkblue', width=4)))
+    fig_roi.add_trace(go.Scatter(y=roi3, mode='lines', name="Jan ROI",line=dict(color='green', width=4)))
+    fig_roi.add_trace(go.Scatter(y=roi4, mode='lines', name="Feb ROI",line=dict(color='red', width=4)))
 
     fig_roi.update_layout(title='Cumulative Return on Investment',
                           xaxis_title='Date',
