@@ -46,21 +46,21 @@ today_date = datetime.now().date()
 
 # Set default values for start and end dates
 #start_date = st.sidebar.date_input("Select Start Date:", value=pd.to_datetime('2024-15-01'))
-start_date = pd.to_datetime('2024-15-01')
+start_date = pd.to_datetime('2024-01-15')
 end_date = st.sidebar.date_input("Select End Date:", value=today_date)
 
 # Fetch data for all three symbols
 stock_data1 = fetch_stock_data(symbol1, start_date, end_date)
 stock_data2 = fetch_stock_data(symbol2, start_date, end_date)
 stock_data3_list = [fetch_stock_data(symbol, start_date, end_date) for symbol in symbol3_list]
-start_date = pd.to_datetime('2024-15-02')
+start_date = pd.to_datetime('2024-02-15')
 stock_data4_list = [fetch_stock_data(symbol, start_date, end_date) for symbol in symbol4_list]
 
 avg_stock3 = pd.concat([stock_data['Close'] for stock_data in stock_data3_list], axis=1).mean(axis=1)
 avg_stock4 = pd.concat([stock_data['Close'] for stock_data in stock_data4_list], axis=1).mean(axis=1)
 
-common_index = stock_data3_list[0].index
-
+common_index3 = stock_data3_list[0].index
+common_index4 = stock_data4_list[0].index
 avg_stock3_df = pd.DataFrame({'Close': avg_stock3})
 avg_stock4_df = pd.DataFrame({'Close': avg_stock4})
 
@@ -91,8 +91,8 @@ with col1:
         color = f'rgba(255, 0, 0, {0.5 + i * 0.1})'  # Adjust the transparency based on 'i'        
         fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name=symbol, line=dict(color=color,dash='dash')))
 
-    fig.add_trace(go.Scatter(x=common_index, y=avg_stock3, mode='lines', name='Avg January Stocks', line=dict(color='green', width=4)))
-    fig.add_trace(go.Scatter(x=common_index, y=avg_stock4, mode='lines', name='Avg February Stocks', line=dict(color='red', width=4)))
+    fig.add_trace(go.Scatter(x=common_index3, y=avg_stock3, mode='lines', name='Avg January Stocks', line=dict(color='green', width=4)))
+    fig.add_trace(go.Scatter(x=common_index4, y=avg_stock4, mode='lines', name='Avg February Stocks', line=dict(color='red', width=4)))
 
     fig.update_layout(title='Stock Closing Prices Comparison',
                       xaxis_title='Date',
