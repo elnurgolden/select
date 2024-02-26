@@ -75,8 +75,18 @@ def invest_portfolio(portfolio, amount, date):
 st.title('SPY Stock Investment Portfolio')
 symbol1 = st.sidebar.text_input("Enter Stock Symbol 1:", "SPY")
 symbol2 = st.sidebar.text_input("Enter Stock Symbol 2:", "QQQ")
-symbol3 = st.sidebar.text_input("Enter January Portfolio Stocks (comma-separated):", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
-symbol4 = st.sidebar.text_input("Enter February Portfolio Stocks (comma-separated):", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
+symbol3 = st.sidebar.text_input("Enter January Stocks:", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
+symbol4 = st.sidebar.text_input("Enter February Stocks:", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
+symbol5 = st.sidebar.text_input("Enter March Stocks:", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
+symbol6 = st.sidebar.text_input("Enter April Stocks:", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
+symbol7 = st.sidebar.text_input("Enter May Stocks:", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
+symbol8 = st.sidebar.text_input("Enter June Stocks:", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
+symbol9 = st.sidebar.text_input("Enter July Stocks:", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
+symbol10 = st.sidebar.text_input("Enter August Stocks:", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
+symbol11 = st.sidebar.text_input("Enter September Stocks:", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
+symbol12 = st.sidebar.text_input("Enter October Stocks:", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
+symbol13 = st.sidebar.text_input("Enter November Stocks:", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
+symbol14 = st.sidebar.text_input("Enter December Stocks:", "AMAT,CAT,MAR,KB,LLY,NFLX,JBL,DECK")
 
 # Split the comma-separated symbols into a list
 symbol3_list = [symbol.strip() for symbol in symbol3.split(',')]
@@ -118,6 +128,7 @@ for ticker in symbol3_list:
     CumulativeStocks_Jan = 'Portfolio_' + ticker
     stock_prices['Portfolio_Jan'] = stock_prices['Portfolio_Jan'] + stock_prices[CumulativeStocks_Jan]
 
+stock_prices = stock_prices[['Date','Portfolio_SPY', 'Portfolio_QQQ','Portfolio_Jan']]
 
 contribution_Month = 'contribution_Feb'
 stock_prices[contribution_Month] = 0
@@ -131,6 +142,7 @@ for ticker in symbol4_list:
     CumulativeStocks_Feb = 'Portfolio_' + ticker
     stock_prices['Portfolio_Feb'] = stock_prices['Portfolio_Feb'] + stock_prices[CumulativeStocks_Feb]
 
+stock_prices = stock_prices[['Date','Portfolio_SPY', 'Portfolio_QQQ','Portfolio_Jan', 'Portfolio_Feb']]
 
 stock_prices['Portfolio_BlackSea'] = stock_prices['Portfolio_Jan'] + stock_prices['Portfolio_Feb']
 #    st.write(stock_prices)
