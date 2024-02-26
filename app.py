@@ -20,19 +20,59 @@ from datetime import datetime
 import yfinance as yf
 import plotly.graph_objects as go
 import pandas as pd
-
+import plotly.express as px
+import numpy as np
 st.set_page_config(layout="wide")
 
 
-def fetch_stock_data(symbol, start_date, end_date):
-    stock_data = yf.download(symbol, start=start_date, end=end_date)
-    return stock_data
 
-# Streamlit UI
-st.title("Stock Data Dashboard")
+def add_portfolio_QQQ(ticker, stock_prices, start_date, end_date):
+
+    stock_prices_QQQ = fetch_stock_data(ticker, start_date, end_date)
+    stock_prices_QQQ.rename(columns={'Close': 'Close_QQQ'}, inplace=True)
+    stock_prices_QQQ = stock_prices_QQQ.reset_index()
+
+    stock_prices = pd.merge(stock_prices, stock_prices_QQQ, how='left', on='Date')
 
 
-# Sidebar for user input
+    
+    stock_prices['NumberStocks_QQQ'] = stock_prices['contribution']/stock_prices['Close_QQQ']
+    stock_prices['CumulativeStocks_QQQ'] = stock_prices['NumberStocks_QQQ'].cumsum()
+    stock_prices['Portfolio_QQQ'] = stock_prices['CumulativeStocks_QQQ']*stock_prices['Close_QQQ'] 
+    return stock_prices
+
+
+
+def add_portfolio(ticker, stock_prices, start_date, end_date, contribution_Month):
+    new_Close = 'Close_'+ticker
+    new_NumberStocks = 'NumberStocks_'+ticker
+    new_CumulativeStocks = 'CumulativeStocks_'+ticker
+    new_Portfolio = 'Portfolio_'+ticker
+
+    stock_prices_QQQ = fetch_stock_data(ticker, start_date, end_date)
+    stock_prices_QQQ.rename(columns={'Close': new_Close}, inplace=True)
+    stock_prices_QQQ = stock_prices_QQQ.reset_index()
+
+    stock_prices = pd.merge(stock_prices, stock_prices_QQQ, how='left', on='Date')
+
+
+    
+    stock_prices[new_NumberStocks] = stock_prices[contribution_Month]/stock_prices[new_Close]
+    stock_prices[new_CumulativeStocks] = stock_prices[new_NumberStocks].cumsum()
+    stock_prices[new_Portfolio] = stock_prices[new_CumulativeStocks]*stock_prices[new_Close] 
+    return stock_prices
+
+
+
+def fetch_stock_data(ticker, start_date, end_date):
+    stock_data = yf.download(ticker, start=start_date, end=end_date)
+    return stock_data[['Close']]
+
+def invest_portfolio(portfolio, amount, date):
+    portfolio[date] += amount
+    return portfolio
+
+st.title('SPY Stock Investment Portfolio')
 symbol1 = st.sidebar.text_input("Enter Stock Symbol 1:", "SPY")
 symbol2 = st.sidebar.text_input("Enter Stock Symbol 2:", "QQQ")
 symbol3 = st.sidebar.text_input("Enter January Portfolio Stocks (comma-separated):", "APO,CRBG,TRV,MELI,SAP,NVS,ORLY")
@@ -42,84 +82,80 @@ symbol4 = st.sidebar.text_input("Enter February Portfolio Stocks (comma-separate
 symbol3_list = [symbol.strip() for symbol in symbol3.split(',')]
 symbol4_list = [symbol.strip() for symbol in symbol4.split(',')]
 
-today_date = datetime.now().date()
+# Parameters
+ticker = symbol1
+start_date = '2024-01-01'
+end_date = datetime.today().strftime('%Y-%m-%d')  # Use today's date
+investment_amount = 1000
+#investment_days_str = ['2024-01-16','2024-02-15']
+#investment_days = pd.to_datetime(investment_days_str)
+# Fetch SPY stock data
+stock_prices = fetch_stock_data(ticker, start_date, end_date)
+stock_prices.rename(columns={'Close': 'Close_SPY'}, inplace=True)
+stock_prices = stock_prices.reset_index()
 
-# Set default values for start and end dates
-#start_date = st.sidebar.date_input("Select Start Date:", value=pd.to_datetime('2024-15-01'))
-start_date = pd.to_datetime('2024-01-15')
-end_date = st.sidebar.date_input("Select End Date:", value=today_date)
+stock_prices['contribution'] = 0
+stock_prices.iloc[9, stock_prices.columns.get_loc('contribution')] = investment_amount
+stock_prices.iloc[31, stock_prices.columns.get_loc('contribution')] = investment_amount
 
-# Fetch data for all three symbols
-stock_data1 = fetch_stock_data(symbol1, start_date, end_date)
-stock_data2 = fetch_stock_data(symbol2, start_date, end_date)
-stock_data3_list = [fetch_stock_data(symbol, start_date, end_date) for symbol in symbol3_list]
-start_date = pd.to_datetime('2024-02-15')
-stock_data4_list = [fetch_stock_data(symbol, start_date, end_date) for symbol in symbol4_list]
-
-avg_stock3 = pd.concat([stock_data['Close'] for stock_data in stock_data3_list], axis=1).mean(axis=1)
-avg_stock4 = pd.concat([stock_data['Close'] for stock_data in stock_data4_list], axis=1).mean(axis=1)
-
-common_index3 = stock_data3_list[0].index
-common_index4 = stock_data4_list[0].index
-avg_stock3_df = pd.DataFrame({'Close': avg_stock3})
-avg_stock4_df = pd.DataFrame({'Close': avg_stock4})
-
-# Layout in two columns
-
-col1, col2 = st.columns(2)
-
-# Left column with stock closing prices comparison
-with col1:
-    st.write("## Stock Data Comparison")
-
-    # Line plot for all three stocks
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(y=stock_data1['Close'], mode='lines', name=symbol1, line=dict(color='blue', width=4)))
-    fig.add_trace(go.Scatter(y=stock_data2['Close'], mode='lines', name=symbol2, line=dict(color='darkblue', width=4)))
-
-    for i, stock_data in enumerate(stock_data3_list):
-        symbol = symbol3_list[i]
-        # Use RGBA format for color with transparency
-        color = f'rgba(0, 128, 0, {0.5 + i * 0.1})'  # Adjust the transparency based on 'i'        
-        fig.add_trace(go.Scatter(y=stock_data['Close'], mode='lines', name=symbol, line=dict(color=color,dash='dash')))
+stock_prices['NumberStocks_SPY'] = stock_prices['contribution']/stock_prices['Close_SPY']
+stock_prices['CumulativeStocks_SPY'] = stock_prices['NumberStocks_SPY'].cumsum()
+stock_prices['Portfolio_SPY'] = stock_prices['CumulativeStocks_SPY']*stock_prices['Close_SPY'] 
 
 
-    for i, stock_data in enumerate(stock_data4_list):
-        symbol = symbol4_list[i]
-        # Use RGBA format for color with transparency
-        color = f'rgba(255, 0, 0, {0.5 + i * 0.1})'  # Adjust the transparency based on 'i'        
-        fig.add_trace(go.Scatter(y=stock_data['Close'], mode='lines', name=symbol, line=dict(color=color,dash='dash')))
+ticker = symbol2
+stock_prices = add_portfolio_QQQ(ticker, stock_prices,  start_date, end_date)
 
-    fig.add_trace(go.Scatter(y=avg_stock3, mode='lines', name='Avg January Stocks', line=dict(color='green', width=4)))
-    fig.add_trace(go.Scatter(y=avg_stock4, mode='lines', name='Avg February Stocks', line=dict(color='red', width=4)))
+contribution_Month = 'contribution_Jan'
+stock_prices[contribution_Month] = 0
+stock_prices.iloc[9, stock_prices.columns.get_loc('contribution_Jan')] = investment_amount/len(symbol3_list)
 
-    fig.update_layout(title='Stock Closing Prices Comparison',
-                      xaxis_title='Date',
-                      yaxis_title='Closing Price')
+for ticker in symbol3_list:
+    stock_prices = add_portfolio(ticker, stock_prices, start_date, end_date, contribution_Month)
 
-    st.plotly_chart(fig)
+stock_prices['Portfolio_Jan'] = 0
+for ticker in symbol3_list:
+    CumulativeStocks_Jan = 'Portfolio_' + ticker
+    stock_prices['Portfolio_Jan'] = stock_prices['Portfolio_Jan'] + stock_prices[CumulativeStocks_Jan]
 
-# Right column with cumulative return on investment
-with col2:
-    st.write("## Cumulative Return on Investment")
-    
-    # Calculate and plot the cumulative return
-    fig_roi = go.Figure()
 
-    roi1 = (stock_data1['Close'] / stock_data1['Close'].iloc[0] - 1) * 100
-    roi2 = (stock_data2['Close'] / stock_data2['Close'].iloc[0] - 1) * 100
-    roi3 = (avg_stock3_df['Close'] / avg_stock3_df['Close'].iloc[0] - 1) * 100
-    roi4 = (avg_stock4_df['Close'] / avg_stock4_df['Close'].iloc[0] - 1) * 100
-    
+contribution_Month = 'contribution_Feb'
+stock_prices[contribution_Month] = 0
+stock_prices.iloc[31, stock_prices.columns.get_loc('contribution_Feb')] = investment_amount/len(symbol4_list)
 
-    fig_roi.add_trace(go.Scatter(y=roi1, mode='lines', name=f"{symbol1} ROI",line=dict(color='blue', width=4)))
-    fig_roi.add_trace(go.Scatter(y=roi2, mode='lines', name=f"{symbol2} ROI",line=dict(color='darkblue', width=4)))
-    fig_roi.add_trace(go.Scatter(y=roi3, mode='lines', name="Jan ROI",line=dict(color='green', width=4)))
-    fig_roi.add_trace(go.Scatter(y=roi4, mode='lines', name="Feb ROI",line=dict(color='red', width=4)))
+for ticker in symbol4_list:
+    stock_prices = add_portfolio(ticker, stock_prices, start_date, end_date, contribution_Month)
 
-    fig_roi.update_layout(title='Cumulative Return on Investment',
-                          xaxis_title='Date',
-                          yaxis_title='ROI (%)')
+stock_prices['Portfolio_Feb'] = 0
+for ticker in symbol4_list:
+    CumulativeStocks_Feb = 'Portfolio_' + ticker
+    stock_prices['Portfolio_Feb'] = stock_prices['Portfolio_Feb'] + stock_prices[CumulativeStocks_Feb]
 
-    st.plotly_chart(fig_roi)
+
+stock_prices['Portfolio_BlackSea'] = stock_prices['Portfolio_Jan'] + stock_prices['Portfolio_Feb']
+#    st.write(stock_prices)
+# Calculate portfolio value
+st.write(stock_prices)
+
+# Create a DataFrame for plotting
+
+    # Plot the portfolio as a time series
+fig = go.Figure()
+
+# Add SPY portfolio line
+fig.add_trace(go.Scatter(x=stock_prices['Date'], y=stock_prices['Portfolio_SPY'],
+                        mode='lines', name='SPY Portfolio', line=dict(color='blue')))
+
+# Add QQQ portfolio line
+fig.add_trace(go.Scatter(x=stock_prices['Date'], y=stock_prices['Portfolio_QQQ'],
+                        mode='lines', name='QQQ Portfolio', line=dict(color='red')))
+
+fig.add_trace(go.Scatter(x=stock_prices['Date'], y=stock_prices['Portfolio_BlackSea'],
+                        mode='lines', name='Black Sea Portfolio', line=dict(color='green')))
+
+# Set layout options
+fig.update_layout(title='Black Sea Portfolio vs SPY and QQQ', xaxis_title='Date', yaxis_title='Portfolio Value',
+                  width=1000)  # Adjust the width as needed
+
+st.plotly_chart(fig)
+
