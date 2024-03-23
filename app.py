@@ -91,6 +91,9 @@ symbol14 = st.sidebar.text_input("Enter December Stocks:", "AMAT,CAT,MAR,KB,LLY,
 # Split the comma-separated symbols into a list
 symbol3_list = [symbol.strip() for symbol in symbol3.split(',')]
 symbol4_list = [symbol.strip() for symbol in symbol4.split(',')]
+symbol5_list = [symbol.strip() for symbol in symbol5.split(',')]
+#symbol6_list = [symbol.strip() for symbol in symbol6.split(',')]
+#symbol7_list = [symbol.strip() for symbol in symbol7.split(',')]
 
 # Parameters
 ticker = symbol1
@@ -107,6 +110,7 @@ stock_prices = stock_prices.reset_index()
 stock_prices['contribution'] = 0
 stock_prices.iloc[9, stock_prices.columns.get_loc('contribution')] = investment_amount
 stock_prices.iloc[31, stock_prices.columns.get_loc('contribution')] = investment_amount
+stock_prices.iloc[41, stock_prices.columns.get_loc('contribution')] = investment_amount
 
 stock_prices['NumberStocks_SPY'] = stock_prices['contribution']/stock_prices['Close_SPY']
 stock_prices['CumulativeStocks_SPY'] = stock_prices['NumberStocks_SPY'].cumsum()
@@ -142,9 +146,23 @@ for ticker in symbol4_list:
     CumulativeStocks_Feb = 'Portfolio_' + ticker
     stock_prices['Portfolio_Feb'] = stock_prices['Portfolio_Feb'] + stock_prices[CumulativeStocks_Feb]
 
-stock_prices = stock_prices[['Date','Portfolio_SPY', 'Portfolio_QQQ','Portfolio_Jan', 'Portfolio_Feb']]
+stock_prices = stock_prices[['Date','Portfolio_SPY', 'Portfolio_QQQ','Portfolio_Jan', 'Portfolio_Feb']] 
 
-stock_prices['Portfolio_BlackSea'] = stock_prices['Portfolio_Jan'] + stock_prices['Portfolio_Feb']
+contribution_Month = 'contribution_Mar'
+stock_prices[contribution_Month] = 0
+stock_prices.iloc[41, stock_prices.columns.get_loc('contribution_Mar')] = investment_amount/len(symbol5_list)
+
+for ticker in symbol5_list:
+    stock_prices = add_portfolio(ticker, stock_prices, start_date, end_date, contribution_Month)
+
+stock_prices['Portfolio_Mar'] = 0
+for ticker in symbol5_list:
+    CumulativeStocks_Mar = 'Portfolio_' + ticker
+    stock_prices['Portfolio_Mar'] = stock_prices['Portfolio_Mar'] + stock_prices[CumulativeStocks_Mar]
+
+stock_prices = stock_prices[['Date','Portfolio_SPY', 'Portfolio_QQQ','Portfolio_Jan', 'Portfolio_Feb', 'Portfolio_Mar']]
+
+stock_prices['Portfolio_BlackSea'] = stock_prices['Portfolio_Jan'] + stock_prices['Portfolio_Feb']+ stock_prices['Portfolio_Mar']
 #    st.write(stock_prices)
 # Calculate portfolio value
 st.write(stock_prices)
